@@ -13,7 +13,7 @@ function App() {
           <Switch>
             <Route path="/" exact>
               <Typography variant="h2" fontWeight="bold">
-                -Select-
+                Puzzlex
               </Typography>
               <Settings />
             </Route>
