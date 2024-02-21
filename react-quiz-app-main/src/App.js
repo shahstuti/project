@@ -8,12 +8,12 @@ import { Box } from "@mui/system";
 function App() {
   return (
     <Router>
-      <Container maxWidth="sm">
+      <Container maxWidth="sm" style={{ marginTop:"180px",backgroundColor: "pink", padding: "20px" }}>
         <Box textAlign="center" mt={5}>
           <Switch>
             <Route path="/" exact>
               <Typography variant="h2" fontWeight="bold">
-                Quiz App
+                -Select-
               </Typography>
               <Settings />
             </Route>
