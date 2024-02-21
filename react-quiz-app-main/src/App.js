@@ -9,10 +9,10 @@ function App() {
   return (
     <Router>
       <Container maxWidth="sm" style={{ marginTop:"180px",backgroundColor: "pink", padding: "20px" }}>
-        <Box textAlign="center" mt={5}>
+        <Box textAlign="center" mt={2} mb={3}>
           <Switch>
             <Route path="/" exact>
-              <Typography variant="h2" fontWeight="bold">
+              <Typography variant="h3" fontWeight="bold">
                 Puzzlex
               </Typography>
               <Settings />
