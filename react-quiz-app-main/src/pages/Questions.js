@@ -1,12 +1,11 @@
-import { Button, CircularProgress, Typography } from "@mui/material";
-import { Box } from "@mui/system";
 import { decode } from "html-entities";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router-dom";
 import useAxios from "../hooks/useAxios";
 import { handleScoreChange } from "../redux/actions";
+import { motion, AnimatePresence } from "framer-motion";
 
 const getRandomInt = (max) => {
   return Math.floor(Math.random() * Math.floor(max));
@@ -20,7 +19,7 @@ const Questions = () => {
     amount_of_question,
     score,
   } = useSelector((state) => state);
-  const history = useHistory();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   let apiUrl = `/api.php?amount=${amount_of_question}`;
@@ -53,9 +52,12 @@ const Questions = () => {
 
   if (loading) {
     return (
-      <Box mt={20}>
-        <CircularProgress />
-      </Box>
+      <div className="flex justify-center items-center py-12">
+        <div className="relative">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-500"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-accent-500 absolute top-0 left-0" style={{animationDirection: 'reverse', animationDuration: '1.5s'}}></div>
+        </div>
+      </div>
     );
   }
 
@@ -68,27 +70,82 @@ const Questions = () => {
     if (questionIndex + 1 < response.results.length) {
       setQuestionIndex(questionIndex + 1);
     } else {
-      history.push("/score");
+      navigate("/score");
     }
   };
 
   return (
-    <Box>
-      <Typography variant="h4">Questions {questionIndex + 1}</Typography>
-      <Typography mt={5}>
-        {decode(response.results[questionIndex].question)}
-      </Typography>
-      {options.map((data, id) => (
-        <Box mt={2} key={id}>
-          <Button onClick={handleClickAnswer} variant="contained">
-            {decode(data)}
-          </Button>
-        </Box>
-      ))}
-      <Box mt={5}>
-        Score: {score} / {response.results.length}
-      </Box>
-    </Box>
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="w-full"
+    >
+      {/* Progress bar */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-medium text-secondary-700">Question {questionIndex + 1} of {response.results.length}</span>
+          <span className="text-sm font-medium text-primary-600">{Math.round((questionIndex / response.results.length) * 100)}% Complete</span>
+        </div>
+        <div className="w-full bg-gray-200 rounded-full h-2.5">
+          <div 
+            className="bg-gradient-to-r from-primary-600 to-accent-500 h-2.5 rounded-full transition-all duration-500 ease-in-out" 
+            style={{ width: `${(questionIndex / response.results.length) * 100}%` }}
+          ></div>
+        </div>
+      </div>
+
+      {/* Question */}
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold text-secondary-900 mb-6">
+          {decode(response.results[questionIndex].question)}
+        </h2>
+      </div>
+
+      {/* Answer options */}
+      <AnimatePresence mode="wait">
+        <motion.div 
+          key={questionIndex}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.3 }}
+          className="space-y-3"
+        >
+          {options.map((data, id) => (
+            <motion.button
+              key={id}
+              onClick={handleClickAnswer}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full text-left p-4 rounded-lg border border-gray-200 
+                        hover:border-primary-300 hover:bg-primary-50 
+                        focus:outline-none focus:ring-2 focus:ring-primary-500 
+                        transition-all duration-200 shadow-sm hover:shadow
+                        flex items-center"
+            >
+              <div className="h-8 w-8 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center mr-3 font-medium">
+                {String.fromCharCode(65 + id)}
+              </div>
+              <span className="text-secondary-800">{decode(data)}</span>
+            </motion.button>
+          ))}
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Score indicator */}
+      <div className="mt-10 pt-6 border-t border-gray-200">
+        <div className="flex items-center">
+          <div className="h-10 w-10 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center mr-3 font-bold">
+            {score}
+          </div>
+          <div>
+            <p className="text-sm text-secondary-600">Current Score</p>
+            <p className="text-lg font-medium text-secondary-900">{score} correct out of {questionIndex + 1} questions</p>
+          </div>
+        </div>
+      </div>
+    </motion.div>
   );
 };
 
